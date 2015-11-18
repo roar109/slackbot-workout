@@ -129,15 +129,18 @@ def fetchActiveUsers(bot):
     active_users = []
 
     for user_id in user_ids:
-        # Add user to the cache if not already
-        if user_id not in bot.user_cache:
-            bot.user_cache[user_id] = User(user_id)
-            if not bot.first_run:
-                # Push our new users near the front of the queue!
-                bot.user_queue.insert(2,bot.user_cache[user_id])
-
-        if bot.user_cache[user_id].isActive():
-            active_users.append(bot.user_cache[user_id])
+        user = User(user_id)
+        #Excludes bots and deleted users
+        if user.isActive():
+            active_users.append(user)
+            
+            # Add user to the cache if not already
+            if user_id not in bot.user_cache:
+                bot.user_cache[user_id] = user
+                if not bot.first_run:
+                    # Push our new users near the front of the queue!
+                    bot.user_queue.insert(2, bot.user_cache[user_id])
+                    print "New user to the cache: " + user.real_name
 
     if bot.first_run:
         bot.first_run = False
@@ -288,20 +291,16 @@ def isOfficeHours(bot):
 
 def main():
     bot = Bot()
-    print "after new bot"
+
     try:
         while True:
             if isOfficeHours(bot):
                 # Re-fetch config file if settings have changed
-                print "before conf"
                 bot.setConfiguration()
-                print "after conf"
                 # Get an exercise to do
                 exercise = selectExerciseAndStartTime(bot)
-                print "after after selectExcer"
                 # Assign the exercise to someone
                 assignExercise(bot, exercise)
-
             else:
                 # Sleep the script and check again for office hours
                 if not bot.debug:

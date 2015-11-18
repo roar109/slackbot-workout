@@ -13,7 +13,7 @@ class User:
         self.id = user_id
 
         # The username (@username) and real name
-        self.username, self.real_name = self.fetchNames()
+        self.username, self.real_name, self.is_bot = self.fetchNames()
 
         # A list of all exercises done by user
         self.exercise_history = []
@@ -27,7 +27,7 @@ class User:
         # A record of past runs
         self.past_workouts = {}
 
-        print "New user: " + self.real_name + " (" + self.username + ")"
+        #print "New user: " + self.real_name + " (" + self.username + ")"
 
 
     def storeSession(self, run_name):
@@ -43,14 +43,18 @@ class User:
 
     def fetchNames(self):
         params = {"token": USER_TOKEN_STRING, "user": self.id}
-        response = requests.get("https://slack.com/api/users.info",
-                params=params)
+        response = requests.get("https://slack.com/api/users.info", params=params)
         user_obj = json.loads(response.text, encoding='utf-8')["user"]
 
         username = user_obj["name"]
         real_name = user_obj["profile"]["real_name"]
-
-        return username, real_name
+        
+        if "is_bot" in user_obj:
+            is_bot = user_obj["is_bot"]
+        else:
+            is_bot = False
+            
+        return username, real_name, is_bot
 
 
     def getUserHandle(self):
@@ -63,11 +67,10 @@ class User:
     def isActive(self):
         try:
             params = {"token": USER_TOKEN_STRING, "user": self.id}
-            response = requests.get("https://slack.com/api/users.getPresence",
-                    params=params)
+            response = requests.get("https://slack.com/api/users.getPresence",  params=params)
             status = json.loads(response.text, encoding='utf-8')["presence"]
 
-            return status == "active"
+            return status == "active" and self.isAvailableToBePickedUp()
         except requests.exceptions.ConnectionError:
             print "Error fetching online status for " + self.getUserHandle()
             return False
@@ -82,4 +85,15 @@ class User:
 
     def hasDoneExercise(self, exercise):
         return exercise["id"] in self.exercise_counts
+        
+    def isAvailableToBePickedUp(self):
+        try:
+            params = {"token": USER_TOKEN_STRING, "user": self.id}
+            response = requests.get("https://slack.com/api/users.info",  params=params)
+            user = json.loads(response.text, encoding='utf-8')["user"]
+
+            return (user["is_bot"] == False) and (user["deleted"] == False)
+        except requests.exceptions.ConnectionError:
+            print "Error fetching online status for " + self.getUserHandle()
+            return False
 
