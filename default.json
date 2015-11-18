@@ -2,6 +2,7 @@
   "teamDomain": "yourDomainHere",
   "channelName": "general",
   "channelId": "channelIdHere",
+  "sendMessageSlackURL":"https://slack.com/api/chat.postMessage?token=",
 
   "officeHours": {
     "on": false,
