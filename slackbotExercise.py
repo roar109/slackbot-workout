@@ -65,10 +65,11 @@ class Bot:
             self.office_hours_on = settings["officeHours"]["on"]
             self.office_hours_begin = settings["officeHours"]["begin"]
             self.office_hours_end = settings["officeHours"]["end"]
+            self.slackpostURL = settings["sendMessageSlackURL"]
 
             self.debug = settings["debug"]
 
-        self.post_URL = "https://" + self.team_domain + ".slack.com/services/hooks/slackbot?token=" + URL_TOKEN_STRING + "&channel=" + HASH + self.channel_name
+        self.post_URL = self.slackpostURL + URL_TOKEN_STRING + "&channel=" + HASH +self.channel_name + "&text="
 
 
 ################################################################################
@@ -157,7 +158,9 @@ def selectExerciseAndStartTime(bot):
 
     # Announce the exercise to the thread
     if not bot.debug:
-        requests.post(bot.post_URL, data=lottery_announcement)
+		tmp = bot.post_URL + lottery_announcement
+		requests.post(tmp, data=lottery_announcement)
+
     print lottery_announcement
 
     # Sleep the script until time is up
@@ -221,7 +224,8 @@ def assignExercise(bot, exercise):
 
     # Announce the user
     if not bot.debug:
-        requests.post(bot.post_URL, data=winner_announcement)
+        tmp = bot.post_URL + winner_announcement
+        requests.post(tmp, data=winner_announcement)
     print winner_announcement
 
 
@@ -254,9 +258,11 @@ def saveUsers(bot):
         user.storeSession(str(datetime.datetime.now()))
 
     s += "```"
-
+    '''
     if not bot.debug:
-        requests.post(bot.post_URL, data=s)
+        tmp = bot.post_URL + s
+        requests.post(tmp, data=s)
+    '''
     print s
 
 
@@ -282,16 +288,17 @@ def isOfficeHours(bot):
 
 def main():
     bot = Bot()
-
+    print "after new bot"
     try:
         while True:
             if isOfficeHours(bot):
                 # Re-fetch config file if settings have changed
+                print "before conf"
                 bot.setConfiguration()
-
+                print "after conf"
                 # Get an exercise to do
                 exercise = selectExerciseAndStartTime(bot)
-
+                print "after after selectExcer"
                 # Assign the exercise to someone
                 assignExercise(bot, exercise)
 
