@@ -196,9 +196,9 @@ Selects a person to do the already-selected exercise
 '''
 def assignExercise(bot, exercise):
     # Select number of reps
-    exercise_reps = random.randrange(exercise["minReps"], exercise["maxReps"]+1)
+    exercise_reps = random.randrange(exercise["minReps"], exercise["maxReps"] + 1)
 
-    winner_announcement = str(exercise_reps) + " " + str(exercise["units"]) + " " + exercise["name"] + " RIGHT NOW "
+    winner_announcement = str(exercise_reps).upper() + " " + str(exercise["units"]).upper() + " " + exercise["name"].upper() + " RIGHT NOW "
 
     # EVERYBODY
     if random.random() < bot.group_callout_chance:
@@ -208,7 +208,7 @@ def assignExercise(bot, exercise):
             user = bot.user_cache[user_id]
             user.addExercise(exercise, exercise_reps)
 
-        logExercise(bot,"@channel",exercise["name"],exercise_reps,exercise["units"])
+        logExercise(bot, "@channel", exercise["name"], exercise_reps, exercise["units"])
 
     else:
         winners = [selectUser(bot, exercise) for i in range(bot.num_people_per_callout)]
@@ -216,11 +216,11 @@ def assignExercise(bot, exercise):
         for i in range(bot.num_people_per_callout):
             winner_announcement += str(winners[i].getUserHandle())
             if i == bot.num_people_per_callout - 2:
-                winner_announcement += ", and "
+                winner_announcement += " , and "
             elif i == bot.num_people_per_callout - 1:
-                winner_announcement += "!"
+                winner_announcement += " !"
             else:
-                winner_announcement += ", "
+                winner_announcement += " , "
 
             winners[i].addExercise(exercise, exercise_reps)
             logExercise(bot,winners[i].getUserHandle(),exercise["name"],exercise_reps,exercise["units"])
@@ -242,7 +242,6 @@ def logExercise(bot,username,exercise,reps,units):
 def saveUsers(bot):
     # Write to the command console today's breakdown
     s = "```\n"
-    #s += "Username\tAssigned\tComplete\tPercent
     s += "Username".ljust(15)
     for exercise in bot.exercises:
         s += exercise["name"] + "  "
@@ -292,6 +291,9 @@ def isOfficeHours(bot):
 def main():
     bot = Bot()
 
+    if bot.debug:
+        print "**Debug mode enabled, is not going to post to Slack API just log stuff**"
+    
     try:
         while True:
             if isOfficeHours(bot):
