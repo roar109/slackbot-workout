@@ -66,10 +66,11 @@ class Bot:
             self.office_hours_begin = settings["officeHours"]["begin"]
             self.office_hours_end = settings["officeHours"]["end"]
             self.slackpostURL = settings["sendMessageSlackURL"]
+            self.botName = settings["botName"]
 
             self.debug = settings["debug"]
 
-        self.post_URL = self.slackpostURL + URL_TOKEN_STRING + "&channel=" + HASH +self.channel_name + "&text="
+        self.post_URL = self.slackpostURL + URL_TOKEN_STRING + "&link_names=1&channel=" + HASH +self.channel_name + "&username="+self.botName+"&text="
 
 
 ################################################################################
@@ -216,11 +217,11 @@ def assignExercise(bot, exercise):
         for i in range(bot.num_people_per_callout):
             winner_announcement += str(winners[i].getUserHandle())
             if i == bot.num_people_per_callout - 2:
-                winner_announcement += " , and "
+                winner_announcement += ", and "
             elif i == bot.num_people_per_callout - 1:
-                winner_announcement += " !"
+                winner_announcement += "!"
             else:
-                winner_announcement += " , "
+                winner_announcement += ", "
 
             winners[i].addExercise(exercise, exercise_reps)
             logExercise(bot,winners[i].getUserHandle(),exercise["name"],exercise_reps,exercise["units"])

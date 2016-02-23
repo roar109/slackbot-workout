@@ -1,5 +1,6 @@
 config.json
 *.pyc
+*.bat
 
 log*.csv
 log*.csv_DEBUG
